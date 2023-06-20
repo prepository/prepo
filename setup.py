@@ -1,4 +1,4 @@
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 setup(
     name="prepo",
@@ -18,7 +18,7 @@ setup(
     packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
     license="Unlicensed",
     install_requires=[],
-    entry_points={"console_scripts": ["my_command=my_package.__main__:cli"]},
+    entry_points={"console_scripts": ["ui=prepo.__main__:cli"]},
     include_package_data=True,
     package_data={"": ["static/*"]},
     python_requires=">=3.6.0",

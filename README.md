@@ -16,8 +16,14 @@ prompt.test('test-with-c', CharacterAgent(var_1='x', emotion='c'))
 
 
 ### TODO
-- UI to visualize
+- UI to visualize results
+- Use async to run tests in parallel
 
-### TODO publishing
+### TODO before publishing
+- handle black, isort, etc
 - requirements-dev.txt
 - wheels
+
+### Done
+- evals
+- Actually call OpenAI
