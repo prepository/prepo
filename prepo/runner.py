@@ -16,7 +16,17 @@ class Job:
 
     async def run(self):
         # print("running", self.prompt.id, self.case.id, self.iter_num)
-        output = await self.llm.generate(self.case.prompt)
+        if self.case.prompt:
+            output = await self.llm.generate(
+                self.case.prompt, model_params=self.case.model_params
+            )
+        elif self.case.messages:
+            output = await self.llm.generate_chat(
+                self.case.messages, self.case.model_params
+            )
+        else:
+            raise Exception("You haven't set a prompt or messages in the test case")
+
         evaluations = self.case.evaluate(output)
 
         # await asyncio.sleep(2)
@@ -26,7 +36,7 @@ class Job:
             "prompt_id": self.prompt.id,
             "case_id": self.case.id,
             "iter_num": self.iter_num,
-            "prompt": self.case.prompt,
+            "prompt": self.case.messages or self.case.prompt,
             "output": output,
             "evaluations": [e.__dict__ for e in evaluations],
         }

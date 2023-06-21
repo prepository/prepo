@@ -1,3 +1,4 @@
+import string
 from abc import ABC, abstractmethod
 from typing import List
 
@@ -38,13 +39,21 @@ class ExactMatch(Evaluator):
         )
 
 
+punctuation = set(string.punctuation)
+
+
 class IncludeWords(Evaluator):
     def __init__(self, target_words: List[str]) -> None:
-        self.target_words = target_words
+        self.target_words = [IncludeWords.clean_word(w) for w in target_words]
+
+    @staticmethod
+    def clean_word(w: str) -> str:
+        return w.lower().translate(str.maketrans("", "", string.punctuation)).strip()
 
     def evaluate(self, output: str) -> Evaluation:
-        string_words = set(output.split(" "))
+        string_words = set([IncludeWords.clean_word(w) for w in output.split(" ")])
         any_words_missing = False
+
         for word in self.target_words:
             if word not in string_words:
                 any_words_missing = True
@@ -52,7 +61,7 @@ class IncludeWords(Evaluator):
 
         return Evaluation(
             type=self.__class__.__name__,
-            score=1.0 if not any_words_missing else 0.0,
+            score=0.0 if any_words_missing else 1.0,
             pass_threshold=1.0,
         )
 

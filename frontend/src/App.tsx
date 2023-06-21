@@ -58,8 +58,16 @@ function App() {
       }
 
       setSelectedRun(latestRun);
+    };
 
-      const newData = await fetchRunData(latestRun);
+    fn();
+  }, []);
+
+  useEffect(() => {
+    const fn = async () => {
+      if (!selectedRun) return;
+
+      const newData = await fetchRunData(selectedRun);
       setData(newData);
 
       const promptIds = Object.keys(newData);
@@ -74,7 +82,7 @@ function App() {
     };
 
     fn();
-  }, []);
+  }, [selectedRun]);
 
   const selectedPrompt = data && selection ? data?.[selection.promptId] : null;
   const selectedCase =
@@ -174,8 +182,11 @@ function App() {
               <div className="px-4 py-2 space-y-4">
                 <div>
                   <p className="font-medium mb-1">Prompt</p>
-                  {/* <p>{selectedCase.prompt.repeat(20)}</p> */}
-                  <p>{selectedCase.prompt}</p>
+                  {typeof selectedCase.prompt === "string" ? (
+                    <p>{selectedCase.prompt}</p>
+                  ) : (
+                    <pre>{JSON.stringify(selectedCase.prompt, null, 2)}</pre>
+                  )}
                 </div>
                 <div>
                   {selectedCase.iterations.length > 1 && (

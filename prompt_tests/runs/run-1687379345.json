@@ -1,0 +1,57 @@
+{
+    "check-sky-color": {
+        "generic-question": {
+            "prompt": "What color is the sky?",
+            "iterations": [
+                {
+                    "iter_num": 0,
+                    "output": "\n\nThe sky is usually a light blue or grayish blue color.",
+                    "evaluations": [
+                        {
+                            "type": "IncludeWords",
+                            "score": 1.0,
+                            "pass_threshold": 1.0
+                        }
+                    ]
+                }
+            ]
+        },
+        "one-word-answer": {
+            "prompt": "What color is the sky? Answer with only one word",
+            "iterations": [
+                {
+                    "iter_num": 0,
+                    "output": "\n\nBlue",
+                    "evaluations": [
+                        {
+                            "type": "IncludeWords",
+                            "score": 1.0,
+                            "pass_threshold": 1.0
+                        }
+                    ]
+                }
+            ]
+        },
+        "one-word-answer-chat": {
+            "prompt": [
+                {
+                    "role": "user",
+                    "content": "What color is the sky? Answer with only one word"
+                }
+            ],
+            "iterations": [
+                {
+                    "iter_num": 0,
+                    "output": "Blue.",
+                    "evaluations": [
+                        {
+                            "type": "IncludeWords",
+                            "score": 1.0,
+                            "pass_threshold": 1.0
+                        }
+                    ]
+                }
+            ]
+        }
+    }
+}

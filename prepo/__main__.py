@@ -76,7 +76,11 @@ async def find_and_run_tests():
 def run():
     import asyncio
 
-    asyncio.run(find_and_run_tests())
+    try:
+        asyncio.run(find_and_run_tests())
+    except Exception as e:
+        print("Error running tests")
+        print(e)
 
 
 if __name__ == "__main__":

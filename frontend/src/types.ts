@@ -11,7 +11,7 @@ export type Iteration = {
 };
 
 export type Test = {
-  prompt: string;
+  prompt: string | Record<string, any>;
   iterations: Iteration[];
 };
 
