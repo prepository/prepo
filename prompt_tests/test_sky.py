@@ -1,7 +1,7 @@
 import os
 
 from prepo import PromptTester
-from prepo.evaluators import ExactMatch, IncludeWords, Noop
+from prepo.evaluators import IncludeWords
 from prepo.llms import OpenAI
 
 tester = PromptTester(
@@ -44,9 +44,3 @@ sky_prompt.test_chat(
         IncludeWords(["blue"]),
     ],
 )
-
-
-# sky_prompt.test("test-with-c", "This is a giddy test", IncludeWords(["giddy"]))
-# sky_prompt.test(
-#     "test-with-b", "What color is the sky?", ExactMatch("blue"), iterations=2
-# )
