@@ -1,6 +1,6 @@
 from typing import List, Union
 
-from .evals import Evaluation, Evaluator
+from .evaluators import Evaluation, Evaluator
 from .llms import LLM
 
 

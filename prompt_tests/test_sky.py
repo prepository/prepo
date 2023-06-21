@@ -1,7 +1,7 @@
 import os
 
 from prepo import PromptTester
-from prepo.evals import ExactMatch, IncludeWords, Noop
+from prepo.evaluators import ExactMatch, IncludeWords, Noop
 from prepo.llms.openai import OpenAI
 
 tester = PromptTester(

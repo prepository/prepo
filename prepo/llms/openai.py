@@ -10,7 +10,7 @@ class OpenAI(LLM):
         if organization:
             openai.organization = organization
 
-    def generate(self, prompt: str):
+    async def generate(self, prompt: str):
         # chat_completion = openai.ChatCompletion.create(
         #     model="gpt-3.5-turbo", messages=[{"role": "user", "content": "Hello world"}]
         # )

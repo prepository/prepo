@@ -16,7 +16,7 @@ class Job:
 
     async def run(self):
         # print("running", self.prompt.id, self.case.id, self.iter_num)
-        output = self.llm.generate(self.case.prompt)
+        output = await self.llm.generate(self.case.prompt)
         evaluations = self.case.evaluate(output)
 
         # await asyncio.sleep(2)

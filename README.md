@@ -25,11 +25,10 @@ prompt.test(
 ```
 
 ### TODO
-- Use async to run tests in parallel
-- store test results
-  - store fixtures by id?
-  - just run test? or should i figure out like pytest how to find tests to be run and then run them?
+
 - fetch test results from server
+- select two runs to diff
+- add actual examples
 - pass in temperature, other params, display in frontend
 
 ### TODO before publishing
@@ -38,6 +37,9 @@ prompt.test(
 - wheels
 
 ### Done
+- Use async to run tests in parallel
+- store test results
+  - store by timestamp
 - evals
 - Actually call OpenAI
 - UI to visualize results
