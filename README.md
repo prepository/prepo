@@ -2,7 +2,18 @@
 
 Prepo is a prompt testing library. Run, save, and visualize prompt outputs so you're never in the dark when editing prompts.
 
-### Usage
+### Library Usage
+```bash
+# Write your tests
+# Run your tests
+python3 -m prepo run
+
+# View results in browser
+python3 -m prepo serve
+# Go to http://127.0.0.1:8000
+```
+
+### Code Usage
 
 ```
 import os
