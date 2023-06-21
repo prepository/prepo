@@ -1,16 +1,20 @@
-export type Iteration = {
-  output: string;
+export type Evaluation = {
+  type: string;
   score: number;
+  pass_threshold: number;
 };
 
-export type TestRun = {
-  id: string;
+export type Iteration = {
+  iter_num: number;
+  output: string;
+  evaluations: Evaluation[];
+};
+
+export type Test = {
   prompt: string;
-  minScore: number;
   iterations: Iteration[];
 };
 
-export type Prompt = {
-  id: string;
-  runs: TestRun[];
-};
+export type Run = Record<string, Test>;
+
+export type RunData = Record<string, Run>;

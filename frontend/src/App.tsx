@@ -1,16 +1,14 @@
 import { useEffect, useState } from "react";
 import { MOCK_FRUIT_EMOTION_GENERATION } from "./mocks";
-import { Prompt, TestRun } from "./types";
+import { Run, RunData, Test } from "./types";
 import { cn } from "./lib/cn";
 
-type DataType = { prompts: Prompt[] };
-
-const getStatusFromRun = (run: TestRun) => {
-  const allIterationsPassed = run.iterations.every(
-    (iter) => iter.score >= run.minScore
+const getStatusFromRun = (test: Test) => {
+  const allIterationsPassed = test.iterations.every((iter) =>
+    iter.evaluations.every((ev) => ev.score >= ev.pass_threshold)
   );
-  const allIterationsFailed = run.iterations.every(
-    (iter) => iter.score < run.minScore
+  const allIterationsFailed = test.iterations.every((iter) =>
+    iter.evaluations.some((ev) => ev.score < ev.pass_threshold)
   );
   return allIterationsPassed ? "pass" : allIterationsFailed ? "fail" : "warn";
 };
@@ -32,30 +30,36 @@ const StatusCircle: React.FC<{ status: Status }> = ({ status }) => {
 };
 
 function App() {
-  const [data, setData] = useState<DataType | null>(null);
+  const [data, setData] = useState<RunData | null>(null);
+  const [selection, setSelection] = useState<{
+    promptId: string;
+    caseId: string;
+    iterIdx: number;
+  } | null>(null);
 
   useEffect(() => {
     const newData = MOCK_FRUIT_EMOTION_GENERATION;
     setData(newData);
 
-    const pid = newData.prompts[0].id;
-    if (pid) setPromptId(pid);
+    const promptIds = Object.keys(newData);
 
-    const rid = newData.prompts[0].runs[0].id;
-    if (rid) setRunId(rid);
+    const pid = promptIds[0];
+    const prompt = newData[pid];
+    const cid = Object.keys(prompt)[0];
+
+    if (pid && cid) {
+      setSelection({ promptId: pid, caseId: cid, iterIdx: 0 });
+    }
   }, []);
 
-  const [promptId, setPromptId] = useState<string | null>("");
-  const [runId, setRunId] = useState<string | null>("");
-
-  const runData = data?.prompts
-    .find((p) => p.id === promptId)
-    ?.runs.find((r) => r.id === runId);
+  const selectedPrompt = data && selection ? data?.[selection.promptId] : null;
+  const selectedCase =
+    selectedPrompt && selection ? selectedPrompt?.[selection.caseId] : null;
 
   return (
-    <main className="h-screen">
+    <main className="h-screen text-sm">
       <div className="px-4 h-[48px] flex items-center">
-        <h1 className="text-lg font-medium">prepo</h1>
+        <h1 className="text-lg font-medium">PromptTest</h1>
       </div>
       <div className="border w-full grid grid-cols-4 h-[calc(100vh-48px)]">
         <div className="col-span-1 border-r h-full overflow-auto">
@@ -63,43 +67,51 @@ function App() {
             Tests
           </h2>
           <div className="">
-            {data?.prompts.map((prompt) => (
+            {Object.entries(data ?? {}).map(([pid, prompt]) => (
               <div
-                key={prompt.id}
+                key={pid}
                 className={cn("px-4 py-2 border-b", {
-                  "bg-slate-50": promptId === prompt.id,
+                  "bg-slate-50": selection?.promptId === pid,
                 })}
               >
                 <p
                   className={cn(
-                    "mb-2 rounded -ml-3 px-3 py-1 cursor-pointer",
+                    "mb-0 rounded -ml-3 px-3 mb-1 cursor-pointer",
                     {}
                   )}
                   onClick={() => {
-                    setPromptId(prompt.id);
-                    setRunId(prompt.runs[0].id);
+                    const cases = Object.keys(prompt);
+                    const cid = cases[0];
+                    if (cid) {
+                      setSelection({ promptId: pid, caseId: cid, iterIdx: 0 });
+                    }
                   }}
                 >
-                  {prompt.id}
+                  {pid}
                 </p>
                 <div className="">
-                  {prompt.runs.map((run) => {
+                  {Object.entries(prompt).map(([cid, test]) => {
                     return (
-                      <div key={run.id}>
+                      <div key={cid}>
                         <div
                           className={cn(
-                            "flex items-center space-x-2 hover:text-blue-600 rounded -ml-3 px-3 py-1 cursor-pointer",
+                            "flex items-center space-x-2 hover:text-blue-600 rounded -ml-3 px-3 cursor-pointer",
                             {
-                              "font-semibold rounded": runId === run.id,
+                              "font-semibold rounded":
+                                selection?.caseId === cid &&
+                                selection?.promptId === pid,
                             }
                           )}
                           onClick={() => {
-                            setRunId(run.id);
-                            setPromptId(prompt.id);
+                            setSelection({
+                              promptId: pid,
+                              caseId: cid,
+                              iterIdx: 0,
+                            });
                           }}
                         >
-                          <StatusCircle status={getStatusFromRun(run)} />
-                          <p>{run.id}</p>
+                          <StatusCircle status={getStatusFromRun(test)} />
+                          <p>{cid}</p>
                         </div>
                       </div>
                     );
@@ -107,7 +119,7 @@ function App() {
                 </div>
               </div>
             ))}
-            {data?.prompts.length === 0 && (
+            {Object.keys(data ?? {}).length === 0 && (
               <div>
                 <p className="text-gray-400">No prompts run</p>
               </div>
@@ -115,51 +127,85 @@ function App() {
           </div>
         </div>
         <div className="col-span-3 h-full overflow-auto">
-          {promptId && runId && runData && (
+          {selection && selectedCase && selectedPrompt && (
             <>
               <div className="flex items-center space-x-2 py-2 bg-slate-50 px-4 sticky top-0 border-b">
-                <StatusCircle status={getStatusFromRun(runData)} />
-                <p>{runId}</p>
+                <StatusCircle status={getStatusFromRun(selectedCase)} />
+                <p>{selection.caseId}</p>
               </div>
               <div className="px-4 py-2 space-y-4">
                 <div>
                   <p className="font-medium mb-1">Prompt</p>
-                  <p>{runData.prompt.repeat(20)}</p>
-                </div>
-                <div className="w-fit text-sm mb-1 bg-slate-50 rounded border px-3 py-2">
-                  Min Score
-                  <span className="ml-2 font-bold">{runData.minScore}</span>
+                  {/* <p>{selectedCase.prompt.repeat(20)}</p> */}
+                  <p>{selectedCase.prompt}</p>
                 </div>
                 <div>
-                  <p className="font-medium mb-1">Runs</p>
-                  {runData.iterations.map((iter, i) => {
-                    return (
-                      <div
-                        key={i}
-                        className="relative bg-slate-50 border rounded px-3 py-3 mb-2"
+                  {selectedCase.iterations.length > 1 && (
+                    <div className="flex items-center mb-1 text-xs rounded space-x-1 text-slate-500">
+                      <button
+                        className="bg-slate-100 px-2 rounded align-middle py-1 font-medium"
+                        disabled={selection.iterIdx === 0}
+                        onClick={() => {
+                          setSelection({
+                            ...selection,
+                            iterIdx: Math.max(selection.iterIdx - 1, 0),
+                          });
+                        }}
                       >
-                        <p className="mb-1 text-xs px-1 rounded text-slate-500 absolute top-1 right-1">
-                          {i + 1} of {runData.iterations.length}
-                        </p>
-                        <div
-                          className={cn(
-                            "text-white w-fit px-2 py-0.5 rounded text-sm mb-2",
-                            getClassesForStatus(
-                              iter.score >= runData.minScore ? "pass" : "fail"
-                            )
-                          )}
-                        >
-                          <span className="mr-1">Score</span>
-                          {iter.score}
-                        </div>
-                        <p className="whitespace-pre-line">
-                          {iter.output.repeat(20) +
-                            "\n\n" +
-                            iter.output.repeat(10)}
-                        </p>
+                        {"◀"}
+                      </button>
+                      <div>
+                        Run {selection.iterIdx + 1} of{" "}
+                        {selectedCase.iterations.length}
                       </div>
-                    );
-                  })}
+                      <button
+                        className="bg-slate-100 px-2 rounded align-middle py-1 font-medium"
+                        disabled={
+                          selection.iterIdx ===
+                          selectedCase.iterations.length - 1
+                        }
+                        onClick={() => {
+                          setSelection({
+                            ...selection,
+                            iterIdx: Math.min(
+                              selection.iterIdx + 1,
+                              selectedCase.iterations.length - 1
+                            ),
+                          });
+                        }}
+                      >
+                        {"▶"}
+                      </button>
+                    </div>
+                  )}
+                  <p className="font-medium mb-1">Evaluations</p>
+                  {selectedCase.iterations[selection.iterIdx].evaluations.map(
+                    (evaluation, i) => {
+                      return (
+                        <div
+                          key={i}
+                          className="relative bg-slate-50 border rounded px-3 py-3 mb-2"
+                        >
+                          <div
+                            className={cn(
+                              "text-white w-fit px-2 py-0.5 rounded text-sm mb-2",
+                              getClassesForStatus(
+                                evaluation.score >= evaluation.pass_threshold
+                                  ? "pass"
+                                  : "fail"
+                              )
+                            )}
+                          >
+                            <span className="mr-1">{evaluation.type}</span>
+                            {evaluation.score} / {evaluation.pass_threshold}
+                          </div>
+                          <p className="whitespace-pre-line">
+                            {selectedCase.iterations[0].output}
+                          </p>
+                        </div>
+                      );
+                    }
+                  )}
                 </div>
               </div>
             </>

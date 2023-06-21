@@ -6,5 +6,5 @@ class LLM(ABC):
         self.api_key = api_key
 
     @abstractmethod
-    def generate(self, prompt) -> str:
+    def generate(self, prompt: str) -> str:
         pass

@@ -10,10 +10,10 @@ class OpenAI(LLM):
         if organization:
             openai.organization = organization
 
-    def generate(self, prompt):
-        chat_completion = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo", messages=[{"role": "user", "content": "Hello world"}]
-        )
+    def generate(self, prompt: str):
+        # chat_completion = openai.ChatCompletion.create(
+        #     model="gpt-3.5-turbo", messages=[{"role": "user", "content": "Hello world"}]
+        # )
 
-        return chat_completion.choices[0].message.content
-        # return f"OpenAI generated: {prompt[0:10]}..."
+        # return chat_completion.choices[0].message.content
+        return f"[OpenAI: {prompt}]"

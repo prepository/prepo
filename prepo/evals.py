@@ -2,16 +2,11 @@ from abc import ABC, abstractmethod
 from typing import List
 
 
-class Test:
-    def __init__(self, score, pass_threshold) -> None:
+class Evaluation:
+    def __init__(self, type: str, score: float, pass_threshold: float) -> None:
+        self.type = type
         self.score = score
         self.pass_threshold = pass_threshold
-
-    def __bool__(self) -> bool:
-        return self.score >= self.pass_threshold
-
-    def __repr__(self) -> str:
-        return f"Test(score={self.score}, pass_threshold={self.pass_threshold}, pass={self.__bool__()})"
 
 
 class Evaluator(ABC):
@@ -19,7 +14,7 @@ class Evaluator(ABC):
         pass
 
     @abstractmethod
-    def evaluate(self, string: str) -> Test:
+    def evaluate(self, output: str) -> Evaluation:
         pass
 
 
@@ -27,32 +22,55 @@ class Noop(Evaluator):
     def __init__(self) -> None:
         pass
 
-    def evaluate(self, string: str) -> Test:
-        print(string)
-        return Test(score=1.0, pass_threshold=1.0)
+    def evaluate(self, output: str) -> Evaluation:
+        return Evaluation(type=self.__class__.__name__, score=1.0, pass_threshold=1.0)
 
 
 class ExactMatch(Evaluator):
     def __init__(self, target: str) -> None:
         self.target = target
 
-    def evaluate(self, string: str) -> Test:
-        return Test(score=1.0 if string == self.target else 0.0, pass_threshold=1.0)
+    def evaluate(self, output: str) -> Evaluation:
+        return Evaluation(
+            type=self.__class__.__name__,
+            score=1.0 if output == self.target else 0.0,
+            pass_threshold=1.0,
+        )
 
 
 class IncludeWords(Evaluator):
     def __init__(self, target_words: List[str]) -> None:
         self.target_words = target_words
 
-    def evaluate(self, string: str) -> Test:
-        string_words = set(string.split(" "))
+    def evaluate(self, output: str) -> Evaluation:
+        string_words = set(output.split(" "))
         any_words_missing = False
         for word in self.target_words:
             if word not in string_words:
                 any_words_missing = True
                 break
 
-        return Test(
+        return Evaluation(
+            type=self.__class__.__name__,
             score=1.0 if not any_words_missing else 0.0,
             pass_threshold=1.0,
+        )
+
+
+class LLMEval(Evaluator):
+    def __init__(self, instruction: str, pass_threshold: float) -> None:
+        self.instruction = instruction
+        self.pass_threshold = pass_threshold
+
+    def grade_output(self, output: str) -> float:
+        import random
+
+        return random.random()
+
+    def evaluate(self, output: str) -> Evaluation:
+        score = self.grade_output(output)
+        return Evaluation(
+            type=self.__class__.__name__,
+            score=score,
+            pass_threshold=self.pass_threshold,
         )
