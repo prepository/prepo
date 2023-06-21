@@ -1,3 +1,5 @@
+import json
+import pathlib
 from types import ModuleType
 
 import typer
@@ -15,7 +17,7 @@ def run():
     uvicorn.run(app, host="127.0.0.1", port=8000)
 
 
-def run_and_store_tests_in_module(module: ModuleType):
+async def run_and_store_tests_in_module(module: ModuleType):
     runner = Runner()
     for name in dir(module):
         tester = getattr(module, name)
@@ -32,17 +34,18 @@ def run_and_store_tests_in_module(module: ModuleType):
                                 iter_num=i,
                             )
                         )
+            outfile_name = module.__name__.split("test_")[1]
+            outfile_path = f"{tester.out_dir}/{outfile_name}.json"
+            print(f"Writing to {tester.out_dir}/{outfile_name}.json")
 
-    if runner.size():
-        results = runner.run_all_jobs()
-        import json
-
-        print(json.dumps(results))
-
-    # run all jobs in batches
+            if runner.size():
+                results = await runner.run_all_jobs()
+                pathlib.Path(tester.out_dir).mkdir(parents=True, exist_ok=True)
+                with open(outfile_path, "w") as outfile:
+                    json.dump(results, outfile, indent=4)
 
 
-def find_and_run_tests():
+async def find_and_run_tests():
     import os
     import sys
 
@@ -54,8 +57,10 @@ def find_and_run_tests():
                 module_name = f"tests.{file_entry.name[:-3]}"
                 __import__(module_name)
                 module = sys.modules[module_name]
-                run_and_store_tests_in_module(module)
+                await run_and_store_tests_in_module(module)
 
 
 if __name__ == "__main__":
-    find_and_run_tests()
+    import asyncio
+
+    asyncio.run(find_and_run_tests())

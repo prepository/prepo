@@ -1,0 +1,73 @@
+{
+    "check-sky-color": {
+        "test-with-xyz": {
+            "prompt": "prompt 1 - say hi based on ",
+            "iterations": [
+                {
+                    "iter_num": 0,
+                    "output": "[OpenAI: prompt 1 - say hi based on ]",
+                    "evaluations": [
+                        {
+                            "type": "Noop",
+                            "score": 1.0,
+                            "pass_threshold": 1.0
+                        },
+                        {
+                            "type": "ExactMatch",
+                            "score": 0.0,
+                            "pass_threshold": 1.0
+                        },
+                        {
+                            "type": "IncludeWords",
+                            "score": 0.0,
+                            "pass_threshold": 1.0
+                        }
+                    ]
+                }
+            ]
+        },
+        "test-with-c": {
+            "prompt": "This is a giddy test",
+            "iterations": [
+                {
+                    "iter_num": 0,
+                    "output": "[OpenAI: This is a giddy test]",
+                    "evaluations": [
+                        {
+                            "type": "IncludeWords",
+                            "score": 1.0,
+                            "pass_threshold": 1.0
+                        }
+                    ]
+                }
+            ]
+        },
+        "test-with-b": {
+            "prompt": "What color is the sky?",
+            "iterations": [
+                {
+                    "iter_num": 0,
+                    "output": "[OpenAI: What color is the sky?]",
+                    "evaluations": [
+                        {
+                            "type": "ExactMatch",
+                            "score": 0.0,
+                            "pass_threshold": 1.0
+                        }
+                    ]
+                },
+                {
+                    "iter_num": 1,
+                    "output": "[OpenAI: What color is the sky?]",
+                    "evaluations": [
+                        {
+                            "type": "ExactMatch",
+                            "score": 0.0,
+                            "pass_threshold": 1.0
+                        }
+                    ]
+                }
+            ]
+        }
+    }
+}

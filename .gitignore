@@ -161,3 +161,6 @@ cython_debug/
 
 # frontend
 frontend/node_modules
+
+# mac
+.DS_Store

@@ -1,3 +1,4 @@
+import asyncio
 from typing import Any
 
 from . import Case, Prompt
@@ -11,11 +12,17 @@ class Job:
         self.iter_num = iter_num
         self.llm = llm
 
-    def run(self):
+        self.has_run = False
+
+    async def run(self):
+        # print("running", self.prompt.id, self.case.id, self.iter_num)
         output = self.llm.generate(self.case.prompt)
         evaluations = self.case.evaluate(output)
 
-        return {
+        # await asyncio.sleep(2)
+
+        self.has_run = True
+        self._results = {
             "prompt_id": self.prompt.id,
             "case_id": self.case.id,
             "iter_num": self.iter_num,
@@ -23,6 +30,12 @@ class Job:
             "output": output,
             "evaluations": [e.__dict__ for e in evaluations],
         }
+
+    def get_results(self):
+        if not self.has_run:
+            raise Exception("Job has not been run yet")
+
+        return self._results
 
 
 class Runner:
@@ -35,10 +48,15 @@ class Runner:
     def add_job(self, job: Job):
         self.jobs.append(job)
 
-    def run_all_jobs(self) -> dict[str, Any]:
+    async def run_all_jobs(self, batch_size=10) -> dict[str, Any]:
+        jobs = [job.run() for job in self.jobs]
+        for i in range(0, len(jobs), batch_size):
+            batch = jobs[i : i + batch_size]
+            await asyncio.gather(*batch)
+
         results = []
         for job in self.jobs:
-            results.append(job.run())
+            results.append(job.get_results())
 
         formatted_results = {}
         for result in results:
