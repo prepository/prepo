@@ -40,9 +40,8 @@ class Prompt:
 
 
 class PromptTester:
-    def __init__(self, llm: LLM, out_dir: str = "./tests/output") -> None:
+    def __init__(self, llm: LLM) -> None:
         self.llm = llm
-        self.out_dir = out_dir
         self.tests: dict[str, Prompt] = {}
 
     def register(self, prompt_id) -> Prompt:

@@ -6,7 +6,6 @@ from prepo.llms.openai import OpenAI
 
 tester = PromptTester(
     llm=OpenAI(api_key=os.getenv("OPENAI_API_KEY")),
-    out_dir="./tests/output",
 )
 
 sky_prompt = tester.register("check-sky-color")

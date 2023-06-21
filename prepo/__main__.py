@@ -17,8 +17,9 @@ def run():
     uvicorn.run(app, host="127.0.0.1", port=8000)
 
 
-async def run_and_store_tests_in_module(module: ModuleType):
+async def get_results_from_module(module: ModuleType):
     runner = Runner()
+    results = {}
     for name in dir(module):
         tester = getattr(module, name)
         if isinstance(tester, PromptTester):
@@ -34,22 +35,22 @@ async def run_and_store_tests_in_module(module: ModuleType):
                                 iter_num=i,
                             )
                         )
-            outfile_name = module.__name__.split("test_")[1]
-            outfile_path = f"{tester.out_dir}/{outfile_name}.json"
-            print(f"Writing to {tester.out_dir}/{outfile_name}.json")
 
             if runner.size():
-                results = await runner.run_all_jobs()
-                pathlib.Path(tester.out_dir).mkdir(parents=True, exist_ok=True)
-                with open(outfile_path, "w") as outfile:
-                    json.dump(results, outfile, indent=4)
+                new_results = await runner.run_all_jobs()
+                results.update(new_results)
+
+    return results
 
 
 async def find_and_run_tests():
     import os
     import sys
+    import time
 
     load_dir = "./tests"
+
+    results = {}
 
     with os.scandir(load_dir) as it:
         for file_entry in it:
@@ -57,7 +58,17 @@ async def find_and_run_tests():
                 module_name = f"tests.{file_entry.name[:-3]}"
                 __import__(module_name)
                 module = sys.modules[module_name]
-                await run_and_store_tests_in_module(module)
+                new_results = await get_results_from_module(module)
+                results.update(new_results)
+
+    outfile_dir = "./tests/outputs"
+    outfile_name = f"run-{str(int(time.time()))}"
+    outfile_path = f"{outfile_dir}/{outfile_name}.json"
+    print(f"Writing to {outfile_path}")
+
+    pathlib.Path(outfile_dir).mkdir(parents=True, exist_ok=True)
+    with open(outfile_path, "w") as outfile:
+        json.dump(results, outfile, indent=4)
 
 
 if __name__ == "__main__":
