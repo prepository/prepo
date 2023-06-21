@@ -18,7 +18,7 @@ setup(
     packages=find_packages(exclude=["*.tests", "*.tests.*", "tests.*", "tests"]),
     license="Unlicensed",
     install_requires=[],
-    entry_points={"console_scripts": ["ui=prepo.__main__:cli"]},
+    entry_points={"console_scripts": ["serve=prepo.__main__:cli"]},
     include_package_data=True,
     package_data={"": ["static/*"]},
     python_requires=">=3.6.0",

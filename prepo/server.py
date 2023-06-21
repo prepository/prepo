@@ -32,6 +32,12 @@ async def read_index():
 
 # The rest of your server implementation can go here
 # and is accessible from the frontend as normal.
-@app.get("/users")
-async def get_users():
-    return ["user1", "user2"]
+@app.get("/runs")
+async def get_runs():
+    # get all files in the ./prompt_tests/outputs file
+    # return the filenames
+    import os
+
+    load_dir = "./prompt_tests/outputs"
+    with os.scandir(load_dir) as it:
+        return [file_entry.name for file_entry in it if file_entry.is_file()]

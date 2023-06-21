@@ -13,7 +13,7 @@ cli = typer.Typer()
 
 
 @cli.command()
-def run():
+def serve():
     uvicorn.run(app, host="127.0.0.1", port=8000)
 
 
@@ -48,20 +48,21 @@ async def find_and_run_tests():
     import sys
     import time
 
-    load_dir = "./tests"
+    load_dir_name = "prompt_tests"
+    load_dir = f"./{load_dir_name}"
 
     results = {}
 
     with os.scandir(load_dir) as it:
         for file_entry in it:
             if file_entry.name.endswith(".py") and file_entry.is_file():
-                module_name = f"tests.{file_entry.name[:-3]}"
+                module_name = f"{load_dir_name}.{file_entry.name[:-3]}"
                 __import__(module_name)
                 module = sys.modules[module_name]
                 new_results = await get_results_from_module(module)
                 results.update(new_results)
 
-    outfile_dir = "./tests/outputs"
+    outfile_dir = "./prompt_tests/outputs"
     outfile_name = f"run-{str(int(time.time()))}"
     outfile_path = f"{outfile_dir}/{outfile_name}.json"
     print(f"Writing to {outfile_path}")
@@ -71,7 +72,12 @@ async def find_and_run_tests():
         json.dump(results, outfile, indent=4)
 
 
-if __name__ == "__main__":
+@cli.command()
+def run():
     import asyncio
 
     asyncio.run(find_and_run_tests())
+
+
+if __name__ == "__main__":
+    cli()

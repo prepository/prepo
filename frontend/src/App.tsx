@@ -56,6 +56,10 @@ function App() {
   const selectedCase =
     selectedPrompt && selection ? selectedPrompt?.[selection.caseId] : null;
 
+  useEffect(() => {
+    fetch("http://localhost:8000/runs");
+  }, []);
+
   return (
     <main className="h-screen text-sm">
       <div className="px-4 h-[48px] flex items-center">
