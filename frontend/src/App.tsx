@@ -1,7 +1,14 @@
 import { useEffect, useState } from "react";
-import { MOCK_FRUIT_EMOTION_GENERATION } from "./mocks";
-import { Run, RunData, Test } from "./types";
+import { RunData, Test } from "./types";
 import { cn } from "./lib/cn";
+import { fetchRunData, fetchRuns } from "./queries";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "./components/ui/select";
 
 const getStatusFromRun = (test: Test) => {
   const allIterationsPassed = test.iterations.every((iter) =>
@@ -37,33 +44,63 @@ function App() {
     iterIdx: number;
   } | null>(null);
 
+  const [runs, setRuns] = useState<string[]>([]);
+  const [selectedRun, setSelectedRun] = useState<string | null>(null);
+
   useEffect(() => {
-    const newData = MOCK_FRUIT_EMOTION_GENERATION;
-    setData(newData);
+    const fn = async () => {
+      const runs = await fetchRuns();
+      setRuns(runs);
 
-    const promptIds = Object.keys(newData);
+      const latestRun = runs[0];
+      if (!latestRun) {
+        return;
+      }
 
-    const pid = promptIds[0];
-    const prompt = newData[pid];
-    const cid = Object.keys(prompt)[0];
+      setSelectedRun(latestRun);
 
-    if (pid && cid) {
-      setSelection({ promptId: pid, caseId: cid, iterIdx: 0 });
-    }
+      const newData = await fetchRunData(latestRun);
+      setData(newData);
+
+      const promptIds = Object.keys(newData);
+
+      const pid = promptIds[0];
+      const prompt = newData[pid];
+      const cid = Object.keys(prompt)[0];
+
+      if (pid && cid) {
+        setSelection({ promptId: pid, caseId: cid, iterIdx: 0 });
+      }
+    };
+
+    fn();
   }, []);
 
   const selectedPrompt = data && selection ? data?.[selection.promptId] : null;
   const selectedCase =
     selectedPrompt && selection ? selectedPrompt?.[selection.caseId] : null;
 
-  useEffect(() => {
-    fetch("http://localhost:8000/runs");
-  }, []);
-
   return (
     <main className="h-screen text-sm">
       <div className="px-4 h-[48px] flex items-center">
-        <h1 className="text-lg font-medium">PromptTest</h1>
+        <h1 className="text-lg font-medium mr-4">PromptTest</h1>
+        <div>
+          <Select
+            value={selectedRun ?? ""}
+            onValueChange={(v) => setSelectedRun(v)}
+          >
+            <SelectTrigger className="w-[200px]">
+              <SelectValue placeholder="Run" />
+            </SelectTrigger>
+            <SelectContent>
+              {runs.map((r) => (
+                <SelectItem key={r} value={r}>
+                  {r}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
       <div className="border w-full grid grid-cols-4 h-[calc(100vh-48px)]">
         <div className="col-span-1 border-r h-full overflow-auto">
@@ -79,10 +116,7 @@ function App() {
                 })}
               >
                 <p
-                  className={cn(
-                    "mb-0 rounded -ml-3 px-3 mb-1 cursor-pointer",
-                    {}
-                  )}
+                  className={cn("rounded -ml-3 px-3 mb-1 cursor-pointer")}
                   onClick={() => {
                     const cases = Object.keys(prompt);
                     const cid = cases[0];
@@ -124,7 +158,7 @@ function App() {
               </div>
             ))}
             {Object.keys(data ?? {}).length === 0 && (
-              <div>
+              <div className="p-4">
                 <p className="text-gray-400">No prompts run</p>
               </div>
             )}

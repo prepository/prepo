@@ -62,7 +62,7 @@ async def find_and_run_tests():
                 new_results = await get_results_from_module(module)
                 results.update(new_results)
 
-    outfile_dir = "./prompt_tests/outputs"
+    outfile_dir = "./prompt_tests/runs"
     outfile_name = f"run-{str(int(time.time()))}"
     outfile_path = f"{outfile_dir}/{outfile_name}.json"
     print(f"Writing to {outfile_path}")

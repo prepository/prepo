@@ -9,10 +9,12 @@
     "build": "tsc && vite build",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
-    "export": "yarn build && cp -R dist/ ../prepo/static"
+    "export": "rm -rf ../prepo/static && yarn build && cp -R dist/ ../prepo/static"
   },
   "dependencies": {
+    "@radix-ui/react-select": "^1.2.2",
     "clsx": "^1.2.1",
+    "lucide-react": "^0.248.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "tailwind-merge": "^1.13.2"

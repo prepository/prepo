@@ -1,3 +1,6 @@
+import json
+import os
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
@@ -34,10 +37,17 @@ async def read_index():
 # and is accessible from the frontend as normal.
 @app.get("/runs")
 async def get_runs():
-    # get all files in the ./prompt_tests/outputs file
-    # return the filenames
-    import os
-
-    load_dir = "./prompt_tests/outputs"
+    load_dir = "./prompt_tests/runs"
     with os.scandir(load_dir) as it:
-        return [file_entry.name for file_entry in it if file_entry.is_file()]
+        return [
+            file_entry.name.replace(".json", "")
+            for file_entry in it
+            if file_entry.is_file()
+        ]
+
+
+@app.get("/runs/{name}")
+async def get_run(name: str):
+    load_dir = "./prompt_tests/runs"
+    with open(f"{load_dir}/{name}.json", "r") as f:
+        return json.load(f)
